@@ -39,6 +39,8 @@ def gen_commands(scheme):
 
     # Foreground and background
     commands.append("\\033]11;#" + str(colors[0]) + "\\007")
+    commands.append("\\033]708;#" + str(colors[0]) + "\\007")
+
     commands.append("\\033]10;#" + str(colors[1]) + "\\007")
 
     # 16 text colors
@@ -116,7 +118,7 @@ def list():
 def usage():
     """Prints program usage information"""
 
-    readme = open("README", "r")
+    readme = open("USAGE", "r")
     for line in readme:
         print(line, end="")
 
@@ -150,6 +152,8 @@ def run():
 
 # Run the program
 if __name__ == "__main__":
+    #Note this is the cscheme directory, not the one named "schemes"
     SCHEMEDIR = "/home/swood/scripts/cscheme/"
     run()
+
 

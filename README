@@ -4,15 +4,67 @@ Usage: cscheme [COMMANDS] [TARGET]
 
 Commands:
 
-add		Creates a new colorscheme from a file, or from a shell prompt if no target
-		is specified.
-
-		If there is a config file it needs to contain 6 digit color hex codes, one
-		on each line in the order: color0,...,color15,foreground, background.
-		
-apply		Applies the target colorscheme.
+set			Applies the target colorscheme.
 
 list		Lists all available colorschemes.
 
 
 template	Prints a template colorscheme file to standard output.
+
+
+
+
+======== Installation ==========
+Change the variable SCHEMEDIR at the bottom of the cscheme.py file
+
+All scheme files should placed inside a directory named "schemes" inside the 
+cschemes directory.
+
+To use the script "colorpicker.sh", you will need to have dmenu installed. It 
+needs to run with superuser privelages, thus to run it from an i3 keybinding, you
+will need to add a rule to the /etc/sudoers file allowing to run without a 
+password.
+
+
+
+
+
+========== Technical Details =========
+The program interfaces with urxvt by sending control sequences to each running 
+of a terminal that it detects. The documentation for the structure of these
+xterm control sequences is laughably terrible, so here is a reference for future
+me to be able to know what the hell is going on inside this code. If you want
+to look at this documentation, just google "xterm CSI"
+
+
+The escape sequences used in this program are formatted like so:
+
+	"\033]NUMBER;#COLOR\007"
+
+where:
+
+	\033	begins the command
+
+	]		specifies that this is an operating system command
+	
+	NUMBER	A number specifying what is to be modified
+			10 or 39	foreground
+			11 or 49	background
+			4;X			The 16-color code X = a number 0-15
+			708			The border color (which is separate from the background)
+
+	;		seperator
+
+	#COLOR	The 6 digit hex colorcode proceeded by a #
+
+	\007	ends the command
+
+
+The command numbers in this format are barely documented, so if you can't find the
+command for the thing you want to do in the relevnat docs, just keep googling. It;is there, it just isn't documented.
+
+
+For actually sending these commands, the program looks at all running terminal 
+instances listed inside the /dev/ptr/ directory. Each one has a number in this dir
+
+

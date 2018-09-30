@@ -13,3 +13,18 @@ boldfont
 italicfont
 bolditalicfont
 
+i3
+	background color (try the guvbox hard/soft bgs)
+	client.focused
+	client.unfocused
+	cliebt.background
+
+	# class         border  backgr. text    indicator  child_border
+client.focused      #504945 #282828 #ebdbb2 #000000    #504945
+
+client.focused_inactive #403834 #282828 #ebdbb2 #000000    #403834
+client.unfocused    #403834 #282828 #ebdbb2 #000000    #403834
+client.background   #282828
+exec_always --no-startup-id xsetroot -solid "#282828"
+
+
