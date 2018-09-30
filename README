@@ -4,12 +4,15 @@ Usage: cscheme [COMMANDS] [TARGET]
 
 Commands:
 
-generate	Creates a new colorscheme from a file, or from a shell prompt if no target
-		is specified
+add		Creates a new colorscheme from a file, or from a shell prompt if no target
+		is specified.
+
 		If there is a config file it needs to contain 6 digit color hex codes, one
-		on each line in the order: color0,...,color15,foreground, background
+		on each line in the order: color0,...,color15,foreground, background.
 		
-apply		Applies the target colorscheme
+apply		Applies the target colorscheme.
 
-list		Lists all available colorschemes
+list		Lists all available colorschemes.
 
+
+template	Prints a template colorscheme file to standard output.

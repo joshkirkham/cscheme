@@ -1,9 +1,14 @@
+#!/usr/bin/python3
+
+"""
+A program to manage and apply colorschemes for running instances of urxvt
+"""
+
 import os
 import sys
 import subprocess
 
-USERNAME = "swood"
-SCHEMEDIR = "/home/" + USERNAME + "/.config/colorschemes/"
+
 
 def is_number(s):
     try:
@@ -17,6 +22,8 @@ def echo(scheme):
     for each_pts in pts:
         if is_number(each_pts):
             subprocess.call(scheme + ' > /dev/pts/{0}'.format(each_pts), shell=True)
+
+
 
 
 def gen_colorscheme(commands):
@@ -37,54 +44,31 @@ def gen_colorscheme(commands):
     print("COLORSCHEME \"" + str(name) + "\" GENERATED")
     
 
-def get_color_input(filepath):
+
+# Generates a list of commands from a colorscheme file
+def gen_commands(filepath):
     f = open(filepath, "r")
-    colors = f.readlines()
+    lines = f.readlines()
+
     
-    for i in range(0, 16):
-        commands.append("\\033]4;" + str(i) + ";#" + str(colors[i]) + "\\007")
+    commands.append("\\033]11;#" + str(get_color(lines[0])) + "\\007")
+    commands.append("\\033]10;#" + str(get_color(lines[1])) + "\\007")
+    
+    for i in range(2, 18):
+        commands.append("\\033]4;" + str(i) + ";#" + str(get_color(lines[i])) + "\\007")
         
-    commands.append("\\033]11;#" + str(colors[16]) + "\\007")
-    commands.append("\\033]10;#" + str(colors[17]) + "\\007")
-
     return commands
 
 
-def get_color_input():
-    questions = ["0 light black",
-            "1 light red",
-            "2 light green",
-            "3 light yellow",
-            "4 light blue",
-            "5 light magenta",
-            "6 light cyan",
-            "7 light gray",
-            "8 heavy black",
-            "9 heavy red",
-            "10 heavy green",
-            "11 heavy yellow",
-            "12 heavy blue",
-            "13 heavy magenta",
-            "14 heavy cyan",
-            "15 heavy gray",
-            "background",
-            "foreground"
-            ]
 
-    answers = []
+#Gets the  6 digit hex color number from a configfile line
+def get_color(line):
+    offset = line.rfind("#")
+    return line[offset+1 : offset + 8]
 
-    for question in questions:
-        answers.append(input(question + ":\t#").upper())
 
-    commands = []
 
-    for i in range(0, 16):
-        commands.append("\\033]4;" + str(i) + ";#" + str(answers[i]) + "\\007")
-        
-    commands.append("\\033]11;#" + str(answers[16]) + "\\007")
-    commands.append("\\033]10;#" + str(answers[17]) + "\\007")
 
-    return commands
 
 
 def list():
@@ -92,6 +76,8 @@ def list():
     for scheme in schemes:
         if scheme[-3:] == ".sh":
             print(scheme[0:-3])
+
+
 
 
 def apply(colorscheme):
@@ -107,27 +93,29 @@ def apply(colorscheme):
         print("ERROR: scheme \"" + colorscheme + "\" not detected")
     
     
+
+
 def usage():
-    print("Usage: cscheme [COMMAND] [TARGET]")
-    print("""Commands:
-    \tgenerate\tCreates a new colorscheme from a file, or stdin if no target is specified
-    \t\t\tIf there is a config file it needs 6digit color hex codes each on one line in the order
-    \t\t\tcolor0,...,color15,foreground, background
-
-    \tapply\t\tApplies a named colorscheme
-
-    \tlist\t\tLists all available colorschemes\n\n"""
-    )
+    readme = open("README", "r")
+    for line in readme:
+        print(line, end="")
 
 
 
-
+def template():
+    string = "#colorscheme name:\n#foreground: #\n#background: #\n"
+    for i in range(0, 16):
+        string = string + "#color" + str(i) + ": #\n"
+    print(string)
 
 
 def run():
     if len(sys.argv) == 1:
         usage()
 
+    elif sys.argv[1] == "-h":
+        usage()
+    
     elif sys.argv[1] == "list":
         list()
 
@@ -137,13 +125,18 @@ def run():
         elif len(sys.argv) > 2:
             gen_colorscheme(get_color_input(sys.argv[2]))
 
-    elif sys.argv[1] == "apply":
+    elif sys.argv[1] == "set":
         if len(sys.argv) < 3:
             usage()
         else:
             apply(sys.argv[2])
 
+    elif sys.argv[1] == "template":
+        template()
+
         
 if __name__ == "__main__":
+    SCHEMEDIR = "/home/swood/.config/colorschemes/"
     run()
+    
 
