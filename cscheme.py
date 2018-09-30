@@ -95,7 +95,7 @@ def is_number(s):
 def template():
     """Prints out a template for a human readable colorscheme file"""
 
-    string = "foreground: #\nbackground: #\n"
+    string = "background: #\nforeground: #\n"
     for i in range(0, 16):
         string = string + "color" + str(i) + ": #\n"
     print(string)
