@@ -1,0 +1,10 @@
+Usage: cscheme [COMMANDS] [TARGET]
+
+Commands:
+
+set	        Applies the target colorscheme.
+
+list        Lists all available colorschemes.
+
+template    Prints a template colorscheme file to standard output.
+
