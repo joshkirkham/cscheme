@@ -3,6 +3,7 @@ import sys
 import subprocess
 
 USERNAME = "swood"
+SCHEMEDIR = "/home/" + USERNAME + "/.config/colorschemes/"
 
 def is_number(s):
     try:
@@ -87,18 +88,39 @@ def get_color_input():
 
 
 def list():
-    schemes = os.listdir("~/" + USERNAME + "/.config/colorschemes/")
+    schemes = os.listdir(SCHEMEDIR)
     for scheme in schemes:
         if scheme[-3:] == ".sh":
             print(scheme[0:-3])
 
 
+def apply(colorscheme):
+    colorscheme = colorscheme + ".sh"
+    schemes = os.listdir(SCHEMEDIR)
+    if colorscheme in schemes:
+        pts = os.listdir('/dev/pts/')
+        for each_pts in pts:
+            if is_number(each_pts):
+                subprocess.call(SCHEMEDIR + colorscheme + ' > /dev/pts/{0}'.format(each_pts), shell=True)
+        
+    else:
+        print("ERROR: scheme \"" + colorscheme + "\" not detected")
+    
+    
 def usage():
     print("Usage: cscheme [COMMAND] [TARGET]")
     print("""Commands:
-    \tgenerate\tCreates a new colorscheme from a file, or stdin if no target\n\t\t\t is specified
-    \tapply\tApplies a named colorscheme
-    \tlist\tLists all available colorschemes\n\n""")
+    \tgenerate\tCreates a new colorscheme from a file, or stdin if no target is specified
+    \t\t\tIf there is a config file it needs 6digit color hex codes each on one line in the order
+    \t\t\tcolor0,...,color15,foreground, background
+
+    \tapply\t\tApplies a named colorscheme
+
+    \tlist\t\tLists all available colorschemes\n\n"""
+    )
+
+
+
 
 
 
