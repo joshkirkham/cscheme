@@ -12,52 +12,62 @@ import subprocess
 
 
 def parse_color(line):
-    """Parses the 6 digit hex color from a line of text"""
+    """Parses the 6 digit hex color or from a line of text"""
     offset = line.rfind("#")
-    return line[offset + 1 : offset + 7]
+    return line[offset : offset + 7]
 
 
 
 
-def gen_commands(scheme):
-    """ Creates a list of non-human-readable commands for running instances of
-    urxvt from a human readable colorscheme file
-    """
-
-    colors = []
-    try:
-        f = open(SCHEMEDIR + "schemes/" + str(scheme), "r")
-        for line in f:
-            colors.append(parse_color(line))
-        f.close()
-
-    except FileNotFoundError:
-        print("ERROR: Could not read scheme: " + scheme)
-
+def gen_rxvt_commands(settings):
+    """Generates a set of rxvt control string commands from a list of settings
+    from a colorscheme file"""
     
     commands = []
 
-    # Foreground and background
-    commands.append("\\033]11;#" + str(colors[0]) + "\\007")
-    commands.append("\\033]708;#" + str(colors[0]) + "\\007")
+    # Background
+    commands.append("\\033]11;" + str(parse_color(settings[0])) + "\\007")
+    commands.append("\\033]708;" + str(parse_color(settings[0])) + "\\007")
 
-    commands.append("\\033]10;#" + str(colors[1]) + "\\007")
+    # Foreground
+    commands.append("\\033]10;" + str(parse_color(settings[1])) + "\\007")
 
     # 16 text colors
     for i in range(2, 18):
-        commands.append("\\033]4;" + str(i-2) + ";#" + str(colors[i]) + "\\007")
+        commands.append("\\033]4;" + str(i-2) + ";" + str(parse_color(settings[i])) + "\\007")
 
     return commands
 
 
 
 
-def apply_scheme(commands):
-    """ Given a list of commands, it generates a shell script of commands,
-    and runs it across all active terminal sessions"""
 
+      
+
+
+def apply_scheme(scheme):
+    """ Given the name of a coloscheme, it generates a shell script of commands,
+    and runs it across all active terminal sessions """
+
+    # Open the scheme file and read in settings from it
+    settings = []
+    xresources = ""
+    try:
+        f = open(SCHEMEDIR + "schemes/" + str(scheme), "r")
+        for line in f:
+            settings.append(line)
+            xresources += line
+        f.close()
+
+        rxvt_commands = gen_rxvt_commands(settings)
+        
+
+    except FileNotFoundError:
+        print("ERROR: Could not read scheme: " + scheme)
+
+    
     script = "#!/bin/sh\n"
-    for command in commands:
+    for command in rxvt_commands:
         script = script + "printf '" + command + "'\n"
 
     # Create a temporary shell script
@@ -69,6 +79,7 @@ def apply_scheme(commands):
     os.chmod(SCHEMEDIR + "colorscheme.sh", 777)
 
     # Run the script on each active terminal
+    # you need to be root to do this
     pts = os.listdir('/dev/pts')
     for each_pts in pts:
         if is_number(each_pts):
@@ -78,15 +89,28 @@ def apply_scheme(commands):
     # Remove the temporary script
     if (os.path.exists(SCHEMEDIR + "colorscheme.sh")):
         os.remove(SCHEMEDIR + "colorscheme.sh")
-    
+
+
+    # Merge the new settings with the xrdb
+    # This will preserve the changes for any new shells opened afterwards
+    f = open(SCHEMEDIR + "dynamic-Xresources", "w+")
+    f.write(xresources)
+    f.close()
+    subprocess.call("xrdb -merge " + SCHEMEDIR + "dynamic-Xresources", shell=True)
+    #os.remove(SCHEMEDIR + "dynamic-Xresources")
+
+
+    # Restart i3 so that it can pull stuff from the newly updated xrdb
+    subprocess.call("i3-msg restart", shell=True)
+
 
 
 
 def is_number(s):
     """Returns true if s is a number"""
-
-    try:
-        int(s)
+dmenu
+dmenu    try:
+dmenu        int(s)
         return True
     except ValueError:
         return False
@@ -97,17 +121,45 @@ def is_number(s):
 def template():
     """Prints out a template for a human readable colorscheme file"""
 
-    string = "background: #\nforeground: #\n"
-    for i in range(0, 16):
-        string = string + "color" + str(i) + ": #\n"
-    print(string)
+    settings = [
+            "URxvt.background",
+            "URxvt.foreground",
+            "URxvt.color0",
+            "URxvt.color1",
+            "URxvt.color2",
+            "URxvt.color3",
+            "URxvt.color4",
+            "URxvt.color5",
+            "URxvt.color6",
+            "URxvt.color7",
+            "URxvt.color8",
+            "URxvt.color9",
+            "URxvt.color10",
+            "URxvt.color11",
+            "URxvt.color12",
+            "URxvt.color13",
+            "URxvt.color14",
+            "URxvt.color15",
+            "URxvt.borderColor",
+            "i3wm.activeBorder",
+            "i3wm.inactiveBorder",
+            "i3wm.background",
+            "i3wm.dmenuNormFG",
+            "i3wm.dmenuNormBG",
+            "i3wm.dmenuSelectFG",
+            "i3wm.dmenuSelectBG",
+            ]
+            
+
+    for item in settings:
+        print(item + ": #")
 
 
 
 
 def list():
     """Lists the schemes currently in the scheme directory"""
-
+    
     schemes = os.listdir(SCHEMEDIR + "/schemes/")
     for scheme in schemes:
             print(scheme)
@@ -145,7 +197,7 @@ def run():
         if len(sys.argv) < 3:
             usage()
         else:
-            apply_scheme(gen_commands(sys.argv[2]))
+            apply_scheme(sys.argv[2])
 
 
 
@@ -155,5 +207,19 @@ if __name__ == "__main__":
     #Note this is the cscheme directory, not the one named "schemes"
     SCHEMEDIR = "/home/swood/scripts/cscheme/"
     run()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

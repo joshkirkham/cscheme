@@ -68,3 +68,4 @@ For actually sending these commands, the program looks at all running terminal
 instances listed inside the /dev/ptr/ directory. Each one has a number in this dir
 
 
+
