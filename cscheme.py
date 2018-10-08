@@ -41,45 +41,23 @@ def gen_rxvt_commands(settings):
 
 
 
+def issue_rxvt_commands(commands):
+    """Creates a temporary shell script which echoes commands onto a rxvt terminal
+    instance. This script is then executed on all running rxvt instances"""
 
-      
-
-
-def apply_scheme(scheme):
-    """ Given the name of a coloscheme, it generates a shell script of commands,
-    and runs it across all active terminal sessions """
-
-    # Open the scheme file and read in settings from it
-    settings = []
-    xresources = ""
-    try:
-        f = open(SCHEMEDIR + "schemes/" + str(scheme), "r")
-        for line in f:
-            settings.append(line)
-            xresources += line
-        f.close()
-
-        rxvt_commands = gen_rxvt_commands(settings)
-        
-
-    except FileNotFoundError:
-        print("ERROR: Could not read scheme: " + scheme)
-
-    
     script = "#!/bin/sh\n"
-    for command in rxvt_commands:
+    for command in commands:
         script = script + "printf '" + command + "'\n"
 
-    # Create a temporary shell script
     f = open(SCHEMEDIR + "colorscheme.sh", "w+")
     f.write(script)
     f.close()
 
-    print(script)
+    #print(script)
     os.chmod(SCHEMEDIR + "colorscheme.sh", 777)
 
     # Run the script on each active terminal
-    # you need to be root to do this
+    # You need to be root to do this
     pts = os.listdir('/dev/pts')
     for each_pts in pts:
         if is_number(each_pts):
@@ -91,14 +69,60 @@ def apply_scheme(scheme):
         os.remove(SCHEMEDIR + "colorscheme.sh")
 
 
-    # Merge the new settings with the xrdb
-    # This will preserve the changes for any new shells opened afterwards
+
+
+def xrdb_merge(xresources):
+    """Create a new temporary file, and merge it into the xrdb"""
+
+    print(xresources)
     f = open(SCHEMEDIR + "dynamic-Xresources", "w+")
     f.write(xresources)
     f.close()
     subprocess.call("xrdb -merge " + SCHEMEDIR + "dynamic-Xresources", shell=True)
-    #os.remove(SCHEMEDIR + "dynamic-Xresources")
+    os.remove(SCHEMEDIR + "dynamic-Xresources")
 
+
+
+
+def color_i3blocks(color):
+    f = open("/home/swood/.scripts/i3blocks/color.py", "w+")
+    f.write("color = \"" + color + "\"")
+    f.close
+
+
+
+def apply_scheme(scheme):
+    """ Given the name of a coloscheme, it generates a shell script of commands,
+    and runs it across all active terminal sessions """
+
+    # Open the scheme file and read in settings from it
+    # Also generate a .Xresources string to be merged later
+    settings = []
+    xresources = ""
+    try:
+        f = open(SCHEMEDIR + "schemes/" + str(scheme), "r")
+        for line in f:
+            settings.append(line)
+            xresources += line
+        f.close()
+
+        rxvt_commands = gen_rxvt_commands(settings)
+
+    except FileNotFoundError:
+        print("ERROR: Could not read scheme: " + scheme)
+
+
+    # Issue changes to all rxvt terminals 
+    issue_rxvt_commands(rxvt_commands)
+
+
+    # Merge the new settings with the xrdb
+    xrdb_merge(xresources)
+
+    #Change the i3blocks settings
+    i3b_color = settings[1]
+    i3b_color = i3b_color[i3b_color.find("#") : -1]
+    color_i3blocks(i3b_color)
 
     # Restart i3 so that it can pull stuff from the newly updated xrdb
     subprocess.call("i3-msg restart", shell=True)
@@ -108,13 +132,16 @@ def apply_scheme(scheme):
 
 def is_number(s):
     """Returns true if s is a number"""
-dmenu
-dmenu    try:
-dmenu        int(s)
+
+    try:
+        int(s)
         return True
     except ValueError:
         return False
 
+
+def set_default(scheme):
+    subprocess.call("cp schemes/"  + scheme + " schemes/default", shell=True)
 
 
 
@@ -143,6 +170,8 @@ def template():
             "URxvt.borderColor",
             "i3wm.activeBorder",
             "i3wm.inactiveBorder",
+            "i3wm.unfocusBorder",
+            "i3wm.directionColor",
             "i3wm.background",
             "i3wm.dmenuNormFG",
             "i3wm.dmenuNormBG",
@@ -193,6 +222,12 @@ def run():
     elif sys.argv[1] == "template":
             template()
 
+    elif sys.argv[1] == "default":
+        if len(sys.argv) >= 3:
+            set_default(sys.argv[2])
+
+        apply_scheme("default")
+
     elif sys.argv[1] == "set":
         if len(sys.argv) < 3:
             usage()
@@ -205,7 +240,7 @@ def run():
 # Run the program
 if __name__ == "__main__":
     #Note this is the cscheme directory, not the one named "schemes"
-    SCHEMEDIR = "/home/swood/scripts/cscheme/"
+    SCHEMEDIR = "/home/swood/.scripts/cscheme/"
     run()
 
 

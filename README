@@ -29,6 +29,8 @@ password.
 
 
 
+
+
 ========== Technical Details =========
 The program interfaces with urxvt by sending control sequences to each running 
 of a terminal that it detects. The documentation for the structure of these

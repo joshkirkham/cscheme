@@ -1,0 +1,68 @@
+URxvt.background
+URxvt.foreground
+URxvt.color0-15
+URxvt.borderColor (auto gen this to be the same as the background color)
+
+i3
+	activeBorder
+	inactiveBorder
+	unfocusBorder
+	directionColor
+	background
+
+i3blocks
+	
+dmenu
+	normFG
+	normBG
+	selectFG
+	selectBG
+
+font This should be one option
+
+bg
+fg
+hard and soft
+	red
+	green
+	yellow
+	blue
+	purple
+	cyan
+	gray
+
+bg0_h
+bg0-4
+fg 0-4
+hard and soft:
+	orange
+
+
+create multiple schemes
+	gruvbox light and dark
+		hard and soft colors
+	rowan theme
+
+	1337 haxor
+
+
+ALL COLORS NEED TO FIND THEIR WAY TO:
+	i3 (thru i3 config)
+	dmenu (i3 config)
+	i3blocks (through colors.py for fg, and i3 config for bg, and font)
+	vim	(custom colorscheme) (edit with a python script -- maybe string.format())
+	ranger (custom colorscheme)
+	qutebrowser (see bash script possibilities)
+	neomutt
+
+template
+[colors]
+$fg_0-5
+$bg_0-5
+$red1
+$red2
+
+[xrdb]
+
+[scripts]
+
