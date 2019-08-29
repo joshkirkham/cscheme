@@ -37,3 +37,4 @@ client.background   #282828
 exec_always --no-startup-id xsetroot -solid "#282828"
 
 
+REDO STATUS BAR WITH BASH INSTEAD OF PYTHON
